@@ -1,0 +1,84 @@
+POST http://127.0.0.1:8000/signup 
+Content-Type: application/json
+
+{"username": "lolo", "password": "Pass1234!", "email": "joj3@mail.com" , "first_name": "lolol3", "last_name":"nooy", "custom_role": "nurse"}
+
+###
+
+POST http://127.0.0.1:8000/login 
+Content-Type: application/json
+
+{ "email": "joj3@mail.com", "password": "Pass1234!" }
+
+###
+
+GET http://127.0.0.1:8000/test_token 
+Content-Type: application/json 
+Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+
+
+###
+POST http://127.0.0.1:8000/api/patients/
+Content-Type:  application/json 
+Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+
+    {
+      "name": "Joshua Kol",
+      "email": "gloria@gmail.com",
+      "address": "bola  street, Lagos",
+      "profileImage": null,
+      "scan": null,
+      "phone": "+23408023397367",
+      "created_by": 5,
+      "dateOfBirth": "2002-04-06",
+      "createdAt": "2023-07-07T09:09:05.013366Z",
+      "updated_at": "2023-07-07T09:09:05.013405Z"
+    }
+
+###
+PATCH  http://127.0.0.1:8000/api/127.0.0.1:8000/api/patients/
+Content-Type:  application/json 
+Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+
+    {
+      "name": "Maria Carey2",
+
+    }
+
+
+###
+GET http://127.0.0.1:8000/patients/patients/
+Content-Type:  application/json
+Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+
+###
+GET  http://127.0.0.1:8000/api/patients/1
+Content-Type:  application/json
+Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+
+###
+GET http://127.0.0.1:8000/api/specialisations/
+Content-Type:  application/json
+Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+
+###
+POST http://127.0.0.1:8000/api/specialisations/
+Content-Type:  application/json
+Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+
+  {
+    "name": "optometrist",
+  },
+
+
+
+###
+PATCH  http://127.0.0.1:8000/api/specialisations/1
+Content-Type:  application/json
+Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+
+  {
+    "name": "oncologist",
+  },
+
+
