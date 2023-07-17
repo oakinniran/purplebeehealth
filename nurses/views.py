@@ -12,50 +12,40 @@ from django.http import JsonResponse
 from .models import Nurse
 from .serializers import NurseSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions
 
 
-
-class NurseSignCreateView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
-    permission_classes = [IsAuthenticated] 
-  
-    def get(self, request):
-        try:
-            nurses =  Nurse.objects.all()
-            serializer = NurseSerializer(nurses, many=True)
-            return Response({"nurses":serializer.data})
-        except  Nurse.DoesNotExist:
-           return Response(serializer.errors, status=400)   
-# @csrf_exempt
-    def post(self, request):
-        try:
-            serializer = NurseSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=201)
-            return Response(serializer.errors, status=400)
-        except  Nurse.DoesNotExist:
-            return Response(serializer.errors, status=400)
-
-
-
-class NurseSignDetailView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
+class NurseList(generics.ListCreateAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
     permission_classes = [IsAuthenticated]
-    def get(self, request, pk):
-        nurse =  Nurse.objects.get(pk=pk)
-        serializer = VitalSignSerialize(nurse)
-        return Response(serializer.data)
 
-    def put(self, request, pk):
-        patient =  Nurse.objects.get(pk=pk)
-        serializer = NurseSerializer(patient, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+    def get_queryset(self):
 
-    def delete(self, request, pk):
-        patient =  Nurse.objects.get(pk=pk)
-        patient.delete()
-        return Response(status=204)
+        queryset = Nurse.objects.all()
+        gender=self.request.query_params.get('gender')
+        if gender is not None:
+            queryset= queryset.filter(gender=gender)
+        return queryset
+
+    serializer_class = NurseSerializer
+    queryset = Nurse.objects.all()
+
+class NurseDetails(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
+    permission_classes = [IsAuthenticated] 
+    serializer_class = NurseSerializer
+    queryset = Nurse.objects.all()
+    permission_classes = [permissions.IsAdminUser] 
+    def destroy(self, request, *args, **kwargs):
+        permission_classes = [permissions.IsAdminUser] 
+        instance = self.get_object()
+        if instance.createdBy != request.user:  # Check if the author is not the current user
+             return Response({"error": "You are not allowed to destroy this instance"})
+        return super().destroy(request, *args, **kwargs)
+    
+    def perform_destroy(self, instance):
+        deleted_by = self.request.user
+        instance.createdBy = deleted_by
+        instance.itemdeletedcount +=1
+        instance.save()
+        super().perform_destroy(instance)

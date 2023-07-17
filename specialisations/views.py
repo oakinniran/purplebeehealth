@@ -4,41 +4,36 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions
 
-class SpecialisationListCreateView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
+
+
+
+class SpecializationList(generics.ListCreateAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
+    permission_classes = [IsAuthenticated]
+    serializer_class = SpecialisationSerializer
+    queryset = Specialisation.objects.all()
+
+class SpecializationDetails(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
+    serializer_class = SpecialisationSerializer
     permission_classes = [IsAuthenticated] 
-    def get(self, request):
-        specialisations = Specialisation.objects.all()
-        serializer = SpecialisationSerializer(specialisations, many=True)
-        return Response(serializer.data)
+    queryset = Specialisation.objects.all()
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user.role != 'admin':  # Check if the author is not the current user
+              return Response({"error": "You are not allowed to destroy this instance"})
+        request.user.itemdeletedcount+=1
+        return super().destroy(request, *args, **kwargs)
 
-    def post(self, request):
-        serializer = SpecialisationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+    
+    # def perform_destroy(self, instance):
+    #     if request.user.role == 'admin': 
+    #     # deleted_by = self.request.user
+    #     # instance.deleted_by = deleted_by
+    #         request.user.itemdeletedcount +=1
+    #         instance.save()
+    #         super().perform_destroy(instance)
+   
 
-
-class SpecialisationDetailView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
-    permission_classes = [IsAuthenticated] 
-
-    def get(self, request, pk):
-        specialisation = Specialisation.objects.get(pk=pk)
-        serializer = SpecialisationSerializer(specialisation)
-        return Response(serializer.data)
-
-    def put(self, request, pk):
-        specialisation = Specialisation.objects.get(pk=pk)
-        serializer = SpecialisationSerializer(specialisation, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
-
-    def delete(self, request, pk):
-        specialisation = Specialisation.objects.get(pk=pk)
-        specialisation.delete()
-        return Response(status=204)

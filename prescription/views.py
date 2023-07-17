@@ -1,6 +1,9 @@
 from django.shortcuts import render
 
 # Create your views here.
+from django.shortcuts import render
+
+# Create your views here.
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,52 +15,43 @@ from django.http import JsonResponse
 from .models import Prescription
 from .serializers import PrescriptionSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions
 
 
-# @csrf_exempt
-class PrescriptionListCreateView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
-    permission_classes = [IsAuthenticated] 
-  
-    def get(self, request):
-        try:
-            prescriptions = Prescription.objects.all()
-            serializer =PrescriptionSerializer(prescriptions, many=True)
-            return Response({"prescriptions":serializer.data})
-        except Prescription.DoesNotExist:
-           return Response(serializer.errors, status=400)   
-# @csrf_exempt
-    def post(self, request):
-        try:
-            serializer = PrescriptionSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=201)
-            return Response(serializer.errors, status=400)
-        except Prescription.DoesNotExist:
-            return Response(serializer.errors, status=400)
-
-
-
-class PrescriptionDetailView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
+class PrescriptionList(generics.ListCreateAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
     permission_classes = [IsAuthenticated]
-    def get(self, request, pk):
-        presciption = Prescription.objects.get(pk=pk)
-        serializer = PrescriptionSerializer(presciption)
-        return Response(serializer.data)
 
-    def put(self, request, pk):
-        presciption = Prescription.objects.get(pk=pk)
-        serializer = PrescriptionSerializer(presciption, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+    def get_queryset(self):
 
-    def delete(self, request, pk):
-        presciption = Prescription.objects.get(pk=pk)
-        presciption.delete()
-        return Response(status=204)
+        queryset = Prescription.objects.all()
+        doctor=self.request.query_params.get('doctor')
+        if doctor is not None:
+            queryset= queryset.filter(doctor=doctor)
+        return queryset
+
+    serializer_class = PrescriptionSerializer
+    queryset = Prescription.objects.all()
+
+class PrescriptionDetails(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
+    permission_classes = [IsAuthenticated]
+    serializer_class = PrescriptionSerializer
+    queryset = Prescription.objects.all()  
+    def destroy(self, request, *args, **kwargs):
+        permission_classes = [permissions.IsAdminUser] 
+        instance = self.get_object()
+        if request.user.role != 'admin':  # Check if the author is not the current user
+              return Response({"error": "You are not allowed to destroy this instance"})
+        request.user.itemdeletedcount+=1
+        return super().destroy(request, *args, **kwargs)
+    
+    # def perform_destroy(self, instance):
+    #     deleted_by = self.request.user
+    #     instance.createdBy = deleted_by
+    #     instance.itemdeletedcount +=1
+    #     instance.save()
+    #     super().perform_destroy(instance)
+
 
 

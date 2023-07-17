@@ -4,41 +4,31 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions
 
-class CategoryListCreateView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
+class CategoryList(generics.ListCreateAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
+    permission_classes = [IsAuthenticated]
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+class CategoryDetails(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
     permission_classes = [IsAuthenticated] 
-    def get(self, request):
-        specialisations = Category.objects.all()
-        serializer = CategorySerializer(specialisations, many=True)
-        return Response(serializer.data)
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
 
-    def post(self, request):
-        serializer = CategorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-
-
-class CategoryDetailView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
-    permission_classes = [IsAuthenticated] 
-
-    def get(self, request, pk):
-        categories = Category.objects.get(pk=pk)
-        categories = CategorySerializer(categories)
-        return Response(categories.data)
-
-    def put(self, request, pk):
-        category = Category.objects.get(pk=pk)
-        category = CategorySerializer(category, data=request.data)
-        if category.is_valid():
-            category.save()
-            return Response(categories.data)
-        return Response(category.errors, status=400)
-
-    def delete(self, request, pk):
-        category = Category.objects.get(pk=pk)
-        category.delete()
-        return Response(status=204)
+    def destroy(self, request, *args, **kwargs):
+        permission_classes = [permissions.IsAdminUser] 
+        instance = self.get_object()
+        if request.user.role != 'admin':  # Check if the author is not the current user
+              return Response({"error": "You are not allowed to destroy this instance"})
+        request.user.itemdeletedcount+=1
+        return super().destroy(request, *args, **kwargs)
+    
+    # def perform_destroy(self, instance):
+    #     deleted_by = self.request.user
+    #     instance.createdBy = deleted_by
+    #     instance.itemdeletedcount +=1
+    #     instance.save()
+    #     super().perform_destroy(instance) 

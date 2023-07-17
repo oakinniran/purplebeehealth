@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
      'corsheaders',
      'myapp',
-     'patients',
      'vitalsign',
      'nurses',
      'pharmacies',
@@ -54,22 +53,24 @@ INSTALLED_APPS = [
      'categories',
     'inventories',
      'checkup',
-     'prescription',
+     'patients',
+    'prescription',
      'specialisations',
+
 ]
 
 
 REST_FRAMEWORK = {
-#   'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-#     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': ( 
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
 
     ),
-    
+
+    #   'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    # ],
 
     #    'DEFAULT_PERMISSION_CLASSES':(
     #    'rest_framework.permissions.AllowAny',
@@ -134,7 +135,7 @@ WSGI_APPLICATION = 'server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'clinicdb',
+        'NAME': 'myimpactdb',
         'USER': 'root',
         'PASSWORD':'nmary246@',
         "HOST":'localhost',

@@ -6,56 +6,52 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
-from django.http import JsonResponse
 from .models import VITALSIGN
 from .serializers import VitalSignSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions
 
 
-# @csrf_exempt
-class VitalSignCreateView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
-    permission_classes = [IsAuthenticated] 
-  
-    def get(self, request):
-        try:
-            vitalsigns = VITALSIGN.objects.all()
-            serializer = VitalSignSerializer(vitalsigns, many=True)
-            return Response({"vitalsigns":serializer.data})
-        except VITALSIGN.DoesNotExist:
-           return Response(serializer.errors, status=400)   
-# @csrf_exempt
-    def post(self, request):
-        try:
-            serializer = VitalSignSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=201)
-            return Response(serializer.errors, status=400)
-        except VITALSIGN.DoesNotExist:
-            return Response(serializer.errors, status=400)
-
-
-# @csrf_exempt
-class VitalSignDetailView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
+class VitalSignList(generics.ListCreateAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
     permission_classes = [IsAuthenticated]
-    def get(self, request, pk):
-        vitalsign = VITALSIGN.objects.get(pk=pk)
-        serializer = VitalSignSerialize(vitalsign)
-        return Response(serializer.data)
 
-    def put(self, request, pk):
-        patient = VITALSIGN.objects.get(pk=pk)
-        serializer = VitalSignSerializer(patient, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+    def get_queryset(self):
 
-    def delete(self, request, pk):
-        patient = VITALSIGN.objects.get(pk=pk)
-        patient.delete()
-        return Response(status=204)
+        queryset = VITALSIGN.objects.all()
+        patient=self.request.query_params.get('patient')
+        if patient is not None:
+            queryset= queryset.filter(patient=patient)
+        return queryset
+
+    serializer_class = VitalSignSerializer
+    queryset = VITALSIGN.objects.all()
+
+class VitalSignDetails(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
+    permission_classes = [IsAuthenticated] 
+    
+    serializer_class = VitalSignSerializer
+    queryset = VITALSIGN.objects.all()
+    def destroy(self, request, *args, **kwargs):
+        permission_classes = [permissions.IsAdminUser] 
+        instance = self.get_object()
+        if request.user.role != 'admin':  # Check if the author is not the current user
+              return Response({"error": "You are not allowed to destroy this instance"})
+        request.user.itemdeletedcount+=1
+        return super().destroy(request, *args, **kwargs)
+    
+    # def perform_destroy(self, instance):
+    #     deleted_by = self.request.user
+    #     instance.createdBy = deleted_by
+    #     instance.itemdeletedcount +=1
+    #     instance.save()
+    #     super().perform_destroy(instance)
+
+
+
+
+  
+

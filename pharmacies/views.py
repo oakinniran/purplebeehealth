@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework import generics, permissions
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
@@ -14,49 +15,39 @@ from .serializers import PharmacySerializer
 from rest_framework.permissions import IsAuthenticated
 
 
-# @csrf_exempt
-class PharmacyListCreateView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
-    permission_classes = [IsAuthenticated] 
-  
-    def get(self, request):
-        try:
-            pharmacies = Pharmacy.objects.all()
-            serializer =PharmacySerializer(pharmacies, many=True)
-            return Response({"pharmacies":serializer.data})
-        except Pharmacy.DoesNotExist:
-           return Response(serializer.errors, status=400)   
-# @csrf_exempt
-    def post(self, request):
-        try:
-            serializer = PharmacySerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=201)
-            return Response(serializer.errors, status=400)
-        except Pharmacy.DoesNotExist:
-            return Response(serializer.errors, status=400)
-
-
-
-class PharmacyDetailView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
+class PharmacyList(generics.ListCreateAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
     permission_classes = [IsAuthenticated]
-    def get(self, request, pk):
-        pharmacy = Pharmacy.objects.get(pk=pk)
-        serializer = PharmacySerializer(pharmacy)
-        return Response(serializer.data)
 
-    def put(self, request, pk):
-        pharmacy = Pharmacy.objects.get(pk=pk)
-        serializer = PharmacySerializer(pharmacy, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+    def get_queryset(self):
 
-    def delete(self, request, pk):
-        pharmacy = Pharmacy.objects.get(pk=pk)
-        pharmacy.delete()
-        return Response(status=204)
+        queryset = Pharmacy.objects.all()
+        sex=self.request.query_params.get('gender')
+        if sex is not None:
+            queryset= queryset.filter(gender=sex)
+        return queryset
+
+    serializer_class = PharmacySerializer
+    queryset = Pharmacy.objects.all()
+
+class PharmacyDetails(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
+    permission_classes = [IsAuthenticated] 
+    serializer_class = PharmacySerializer
+    queryset = Pharmacy.objects.all()
+    def destroy(self, request, *args, **kwargs):
+        permission_classes = [permissions.IsAdminUser] 
+        instance = self.get_object()
+        if request.user.role != 'admin':  # Check if the author is not the current user
+              return Response({"error": "You are not allowed to destroy this instance"})
+        request.user.itemdeletedcount+=1
+        return super().destroy(request, *args, **kwargs)
+    
+    # def perform_destroy(self, instance):
+    #     deleted_by = self.request.user
+    #     instance.createdBy = deleted_by
+    #     instance.itemdeletedcount +=1
+    #     instance.save()
+    #     super().perform_destroy(instance)
+
 

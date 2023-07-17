@@ -5,7 +5,7 @@ from .models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = CustomUser
-        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'date_joined', 'custom_role']
+        fields = '__all__'
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

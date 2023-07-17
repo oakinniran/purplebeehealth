@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 class Specialisation(models.Model):
     specialisationID=models.AutoField(primary_key=True)

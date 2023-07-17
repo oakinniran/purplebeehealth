@@ -1,7 +1,7 @@
 POST http://127.0.0.1:8000/signup 
 Content-Type: application/json
 
-{"username": "lolo", "password": "Pass1234!", "email": "joj3@mail.com" , "first_name": "lolol3", "last_name":"nooy", "custom_role": "nurse"}
+{"username": "lolo", "password": "Pass1234!", "email": "joj3@mail.com" , "first_name": "lolol3", "last_name":"nooy", "role": "nurse"}
 
 ###
 
@@ -14,31 +14,32 @@ Content-Type: application/json
 
 GET http://127.0.0.1:8000/test_token 
 Content-Type: application/json 
-Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+Authorization: Token ad8a73033df0340923b3892f362e04631038d900
 
 
 ###
-POST http://127.0.0.1:8000/api/patients/
+POST http://127.0.0.1:8000/api/patients/patients/
 Content-Type:  application/json 
-Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+Authorization: Token 409ad63e44933267df0eebe5610a09e648d7f049
 
-    {
-      "name": "Joshua Kol",
+    {"name": "Joshua Kol",
       "email": "gloria@gmail.com",
       "address": "bola  street, Lagos",
       "profileImage": null,
       "scan": null,
       "phone": "+23408023397367",
-      "created_by": 5,
-      "dateOfBirth": "2002-04-06",
-      "createdAt": "2023-07-07T09:09:05.013366Z",
-      "updated_at": "2023-07-07T09:09:05.013405Z"
-    }
+      "dateOfBirth": "2002-04-06"
+      }
+
+###      
+GET http://127.0.0.1:8000/api/patients/patients/2
+Content-Type:  application/json 
+Authorization: Token 409ad63e44933267df0eebe5610a09e648d7f049
 
 ###
-PATCH  http://127.0.0.1:8000/api/127.0.0.1:8000/api/patients/
+PATCH   http://127.0.0.1:8000/api/127.0.0.1:8000/api/patients/patients/2/
 Content-Type:  application/json 
-Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+Authorization: Token 409ad63e44933267df0eebe5610a09e648d7f049
 
     {
       "name": "Maria Carey2",
@@ -47,9 +48,9 @@ Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
 
 
 ###
-GET http://127.0.0.1:8000/patients/patients/
+GET http://127.0.0.1:8000/api/patients/patients/2
 Content-Type:  application/json
-Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+Authorization: Token 1fc2cd971fea2887c73ff6c3bb7b4dcbc348a4cf
 
 ###
 GET  http://127.0.0.1:8000/api/patients/1
@@ -57,9 +58,9 @@ Content-Type:  application/json
 Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
 
 ###
-GET http://127.0.0.1:8000/api/specialisations/
+GET http://127.0.0.1:8000/api/specialisations/specialisations/
 Content-Type:  application/json
-Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
+Authorization: Token 409ad63e44933267df0eebe5610a09e648d7f049
 
 ###
 POST http://127.0.0.1:8000/api/specialisations/
@@ -73,7 +74,7 @@ Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
 
 
 ###
-PATCH  http://127.0.0.1:8000/api/specialisations/1
+PATCH  http://127.0.0.1:8000/api/specialisations/specialisations/2
 Content-Type:  application/json
 Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
 
@@ -81,4 +82,8 @@ Authorization: Token e43d6002368c9c49a5be7c32a95d69f659e1d6b7
     "name": "oncologist",
   },
 
+###
+DELETE http://127.0.0.1:8000/api/patients/patients/2/
+Content-Type: application/json
+Authorization: Token 409ad63e44933267df0eebe5610a09e648d7f049
 

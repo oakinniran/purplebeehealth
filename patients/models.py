@@ -1,6 +1,7 @@
 from django.db import models
 # from django.contrib.auth.models import Use
 from myapp.models import CustomUser
+import uuid
 
 # Create your models here.
 class Patients(models.Model):
@@ -12,10 +13,10 @@ class Patients(models.Model):
     scan = models.ImageField(upload_to='scan_images', blank=True, null=True)
     phone=models.CharField(max_length=200)
     gender=models.CharField(max_length=50, null=True)
-    created_by=models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    createdBy=models.ForeignKey(CustomUser, on_delete=models.CASCADE, blank=True, null=True)
     dateOfBirth = models.DateField()
     createdAt=models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add = True, null = True)
+    updatedAt = models.DateTimeField(auto_now_add = True, null = True)
 
     class Meta:
         verbose_name_plural = 'Patients'

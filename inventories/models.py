@@ -7,7 +7,7 @@ from myapp.models import CustomUser
 class Inventory(models.Model):
     class Meta:
         verbose_name_plural = 'inventories'
-
+    inventoriesId =models.AutoField(primary_key=True)
     category=models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
     name=models.CharField(max_length=225)
     description=models.TextField(blank=True, null=True)

@@ -12,50 +12,42 @@ from django.http import JsonResponse
 from .models import Inventory
 from .serializers import InventorySerializer
 from rest_framework.permissions import IsAuthenticated
-
-
-# @csrf_exempt
-class InventoryListCreateView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
-    permission_classes = [IsAuthenticated] 
-  
-    def get(self, request):
-        try:
-            inventories = Inventory.objects.all()
-            serializer = InventorySerializer(inventories, many=True)
-            return Response({"inventories":serializer.data})
-        except Inventory.DoesNotExist:
-           return Response(serializer.errors, status=400)   
-# @csrf_exempt
-    def post(self, request):
-        try:
-            serializer = InventorySerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=201)
-            return Response(serializer.errors, status=400)
-        except Inventory.DoesNotExist:
-            return Response(serializer.errors, status=400)
+from rest_framework import generics, permissions
 
 
 
-class inventoryDetailView(APIView):
-    authentication_classes = ([SessionAuthentication, TokenAuthentication])
+class InventoryList(generics.ListCreateAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
     permission_classes = [IsAuthenticated]
-    def get(self, request, pk):
-        inventory = Inventory.objects.get(pk=pk)
-        serializer = PatientSerialize(inventory)
-        return Response(serializer.data)
 
-    def put(self, request, pk):
-        inventory = Inventory.objects.get(pk=pk)
-        serializer = InventorySerializer(inventory, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+    def get_queryset(self):
 
-    def delete(self, request, pk):
-        inventory = Inventory.objects.get(pk=pk)
-        inventory.delete()
-        return Response(status=204)
+        queryset = Inventory.objects.all()
+        category=self.request.query_params.get('category')
+        if category is not None:
+            queryset= queryset.filter(category=category)
+        return queryset
+
+    serializer_class = InventorySerializer
+    queryset = Inventory.objects.all()
+
+class InventoryDetails(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = ([SessionAuthentication,TokenAuthentication])
+    permission_classes = [IsAuthenticated] 
+    serializer_class = InventorySerializer
+    queryset = Inventory.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        permission_classes = [permissions.IsAdminUser] 
+        instance = self.get_object()
+        if request.user.role != 'admin':  # Check if the author is not the current user
+              return Response({"error": "You are not allowed to destroy this instance"})
+        request.user.itemdeletedcount+=1
+        return super().destroy(request, *args, **kwargs)
+    
+    # def perform_destroy(self, instance):
+    #     deleted_by = self.request.user
+    #     instance.createdBy = deleted_by
+    #     instance.itemdeletedcount +=1
+    #     instance.save()
+    #     super().perform_destroy(instance) 

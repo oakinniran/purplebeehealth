@@ -11,7 +11,7 @@ class CheckupDetail(models.Model):
     diagnoses = models.TextField()
     doctor=models.ForeignKey(Physician,  on_delete=models.CASCADE, null=True)
     doctorRemark=models.TextField()
-    locatiom=models.CharField(max_length=200)
+    location=models.CharField(max_length=200)
     prescription=models.TextField()
     createdAt=models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add = True, null = True)
