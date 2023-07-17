@@ -56,6 +56,7 @@ INSTALLED_APPS = [
      'patients',
     'prescription',
      'specialisations',
+     'drf_yasg'
 
 ]
 
