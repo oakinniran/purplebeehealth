@@ -31,7 +31,10 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 ALLOWED_HOSTS = []
+CORS_ORIGIN_WHITELIST =[
+        "http://localhost:3000"
 
+]
 
 # Application definition
 
@@ -134,9 +137,9 @@ WSGI_APPLICATION = 'server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'clinicdb',
-        'USER': 'root',
-        'PASSWORD':'nmary246@',
+        'NAME': 'pbhealth',
+        'USER': 'clinicdb',
+        'PASSWORD':'1234',
         "HOST":'localhost',
         'PORT': '3306',
     }
